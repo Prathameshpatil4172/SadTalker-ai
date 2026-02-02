@@ -192,10 +192,10 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 - [GFPGAN](https://github.com/TencentARC/GFPGAN) for face enhancement
 - [Flask](https://flask.palletsprojects.com/) web framework
 
-## 📧 Contact
+## 📧 Contact :- 9561155148
 
 For questions or support, please open an issue on GitHub.
 
 ---
 
-Made with ❤️ by [Prathamesh Patil](https://github.com/Prathameshpatil4172)
+Made with ❤️ by [suyash sonawane](https://github.com/Suyash261)
