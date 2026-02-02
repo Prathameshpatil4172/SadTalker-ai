@@ -60,37 +60,65 @@ SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ### 1.5 Set Storage Policies
 
-1. **For 'uploads' bucket:**
-   - Click the bucket → Policies → "New Policy"
-   - Select "For Select" (read)
-   - Policy name: "Users can read own uploads"
-   - Allowed operation: SELECT
-   - Target roles: `authenticated`
-   - Policy definition:
+Based on the screenshot, you need to create policies for both buckets. Here's the exact setup:
+
+#### For 'UPLOADS' bucket:
+
+**Policy 1: Users can read own uploads (SELECT)**
+1. Click "New policy" on UPLOADS bucket
+2. Select "For SELECT" (read files)
+3. Policy name: `Users can read own uploads`
+4. Allowed operation: `SELECT`
+5. Target roles: `authenticated`
+6. Policy definition:
 ```sql
 (storage.foldername(name))[1] = auth.uid()::text
 ```
-   - Click "Review" → "Save policy"
+7. Click "Review" → "Save policy"
 
-2. **Create Insert policy for uploads:**
-   - Click "New Policy" → "For Insert"
-   - Policy name: "Users can upload files"
-   - Target roles: `authenticated`
-   - Policy definition:
+**Policy 2: Users can upload files (INSERT)**
+1. Click "New policy" on UPLOADS bucket
+2. Select "For INSERT" (upload files)
+3. Policy name: `Users can upload files`
+4. Allowed operation: `INSERT`
+5. Target roles: `authenticated`
+6. Policy definition:
 ```sql
 (storage.foldername(name))[1] = auth.uid()::text AND (
-  (storage.extension(name) = 'jpg' OR 
-   storage.extension(name) = 'jpeg' OR 
-   storage.extension(name) = 'png' OR 
-   storage.extension(name) = 'wav' OR 
-   storage.extension(name) = 'mp3')
+  storage.extension(name) = 'jpg' OR 
+  storage.extension(name) = 'jpeg' OR 
+  storage.extension(name) = 'png' OR 
+  storage.extension(name) = 'wav' OR 
+  storage.extension(name) = 'mp3'
 )
 ```
-   - Click "Save policy"
+7. Click "Review" → "Save policy"
 
-3. **For 'results' bucket:**
-   - Create SELECT policy with same definition as uploads
-   - Create INSERT policy for `service_role` only (API will use this)
+#### For 'RESULTS' bucket:
+
+**Policy 1: Users can read own results (SELECT)**
+1. Click "New policy" on RESULTS bucket
+2. Select "For SELECT"
+3. Policy name: `Users can read own results`
+4. Allowed operation: `SELECT`
+5. Target roles: `authenticated`
+6. Policy definition:
+```sql
+(storage.foldername(name))[1] = auth.uid()::text
+```
+7. Click "Review" → "Save policy"
+
+**Policy 2: API can upload results (INSERT)**
+1. Click "New policy" on RESULTS bucket
+2. Select "For INSERT"
+3. Policy name: `API can upload results`
+4. Allowed operation: `INSERT`
+5. Target roles: `service_role` (NOT authenticated - this is for your API server only)
+6. Policy definition:
+```sql
+true
+```
+7. Click "Review" → "Save policy"
 
 ### 1.6 Enable Realtime
 
