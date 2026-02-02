@@ -113,11 +113,17 @@ Based on the screenshot, you need to create policies for both buckets. Here's th
 2. Select "For INSERT"
 3. Policy name: `API can upload results`
 4. Allowed operation: `INSERT`
-5. Target roles: `service_role` (NOT authenticated - this is for your API server only)
+5. Target roles: Select `public` (or `service_role` if available)
 6. Policy definition:
 ```sql
-true
+bucket_id = 'results'
 ```
+   ⚠️ **Note:** If using the SQL editor, the full policy would be:
+   ```sql
+   CREATE POLICY "API can upload results" ON storage.objects 
+   FOR INSERT TO service_role 
+   WITH CHECK (bucket_id = 'results');
+   ```
 7. Click "Review" → "Save policy"
 
 ### 1.6 Enable Realtime
