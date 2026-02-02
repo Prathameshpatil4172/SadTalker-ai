@@ -1,0 +1,107 @@
+/* =================================================
+   SadTalker AI Studio – Visual Override Layer
+   SAFE: no layout / no JS / no HTML changes
+   ================================================= */
+
+/* Background like screenshot */
+body {
+  background: radial-gradient(circle at top left, #2b1b5a, #0b1020 65%) !important;
+}
+
+/* Main container spacing */
+.container {
+  background: transparent !important;
+}
+
+/* Card look (glass panels) */
+.section,
+.panel,
+.upload-box,
+.settings-box,
+.video-upload-box {
+  background: rgba(255, 255, 255, 0.06) !important;
+  backdrop-filter: blur(14px);
+  border-radius: 16px !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 0 40px rgba(120, 80, 255, 0.18);
+}
+
+/* Section titles */
+.section-title,
+.panel-tab,
+.upload-label {
+  color: #e5e7eb !important;
+}
+
+/* Upload dashed boxes */
+.image-upload-area,
+.audio-upload-area,
+.video-placeholder,
+.preview-box {
+  background: rgba(0,0,0,0.35) !important;
+  border: 1px dashed rgba(139,92,246,0.35) !important;
+  border-radius: 14px !important;
+}
+
+/* Inputs */
+input,
+select,
+.number-input {
+  background: rgba(0,0,0,0.4) !important;
+  color: #e5e7eb !important;
+  border: 1px solid rgba(255,255,255,0.18) !important;
+}
+
+/* Sliders */
+.slider,
+input[type="range"] {
+  accent-color: #8b5cf6;
+}
+
+/* Radio buttons active */
+.radio-label:has(input:checked) {
+  background: linear-gradient(135deg,#8b5cf6,#22d3ee) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+
+/* Toggle-style checkboxes (visual only) */
+.checkbox-label input[type="checkbox"] {
+  accent-color: #22d3ee;
+}
+
+/* Generate button (main highlight) */
+.generate-btn,
+.submit-btn {
+  background: linear-gradient(90deg,#8b5cf6,#6366f1,#22d3ee) !important;
+  border-radius: 18px !important;
+  box-shadow: 0 0 30px rgba(99,102,241,0.6);
+}
+
+.generate-btn:hover,
+.submit-btn:hover {
+  box-shadow: 0 0 45px rgba(99,102,241,0.85);
+  transform: translateY(-1px);
+}
+
+/* History / modal */
+.modal-content {
+  background: #0b1020 !important;
+  color: #e5e7eb !important;
+  border-radius: 18px;
+}
+
+/* Muted text */
+.sub-label,
+.info-text,
+.option-desc,
+.help-text {
+  color: #9ca3af !important;
+}
+
+/* Small glow accents */
+.image-upload-area:hover,
+.audio-upload-area:hover,
+.video-placeholder:hover {
+  box-shadow: 0 0 18px rgba(139,92,246,0.45);
+}

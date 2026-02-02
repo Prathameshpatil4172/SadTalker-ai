@@ -1,5 +1,6 @@
 import torch, uuid
 import os, sys, shutil
+import subprocess
 from src.utils.preprocess import CropAndExtract
 from src.test_audio2coeff import Audio2Coeff  
 from src.facerender.animate import AnimateFromCoeff
@@ -9,6 +10,54 @@ from src.generate_facerender_batch import get_facerender_data
 from src.utils.init_path import init_path
 
 from pydub import AudioSegment
+
+
+def convert_mp4_to_webm(video_path):
+    if video_path is None:
+        return None
+
+    # If already webm, do nothing
+    if video_path.lower().endswith(".webm"):
+        return video_path
+
+    webm_path = os.path.splitext(video_path)[0] + ".webm"
+
+    cmd = (
+        f'ffmpeg -y -i "{video_path}" '
+        f'-c:v libvpx-vp8 '
+        f'-pix_fmt yuv420p '
+        f'-b:v 1M -c:a libvorbis "{webm_path}"'
+    )
+
+    subprocess.run(
+        cmd,
+        shell=True,
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL
+    )
+
+    # Return WEBM so SAME video box reloads
+    if os.path.exists(webm_path):
+        return webm_path
+    
+    return video_path
+
+def normalize_for_browser(video_path):
+    print("ORIGINAL VIDEO:", video_path)
+
+    fixed_path = video_path.replace(".mp4", "_browser.mp4")
+    print("CONVERTED VIDEO:", fixed_path)
+
+    cmd = (
+        f'ffmpeg -y -i "{video_path}" '
+        f'-vf "scale=trunc(iw/2)*2:trunc(ih/2)*2,format=yuv420p" '
+        f'-c:v libx264 -profile:v baseline -level 3.0 '
+        f'-movflags +faststart '
+        f'-c:a aac "{fixed_path}"'
+    )
+
+    os.system(cmd)
+    return fixed_path
 
 
 def mp3_to_wav(mp3_filename,wav_filename,frame_rate):
@@ -76,18 +125,16 @@ class SadTalker():
             from pydub import AudioSegment
             one_sec_segment = AudioSegment.silent(duration=1000*length_of_audio)  #duration in milliseconds
             one_sec_segment.export(audio_path, format="wav")
-        else:
-            print(use_ref_video, ref_info)
-            assert use_ref_video == True and ref_info == 'all'
-
-        if use_ref_video and ref_info == 'all': # full ref mode
+        elif use_ref_video and ref_video is not None:
+            ref_video = normalize_for_browser(ref_video)
             ref_video_videoname = os.path.basename(ref_video)
             audio_path = os.path.join(save_dir, ref_video_videoname+'.wav')
             print('new audiopath:',audio_path)
             # if ref_video contains audio, set the audio from ref_video.
-            cmd = r"ffmpeg -y -hide_banner -loglevel error -i %s %s"%(ref_video, audio_path)
-            os.system(cmd)        
-
+            cmd = f'ffmpeg -y -i "{ref_video}" "{audio_path}"'
+            os.system(cmd) 
+        else:
+            raise ValueError("No audio provided, and no reference video to extract audio from.")
         os.makedirs(save_dir, exist_ok=True)
         
         #crop image and extract 3dmm from image
@@ -140,6 +187,11 @@ class SadTalker():
         video_name = data['video_name']
         print(f'The generated video is named {video_name} in {save_dir}')
 
+        return_path = convert_mp4_to_webm(return_path)
+        
+        abs_path = os.path.abspath(return_path)
+        print(f'Reading video bytes from: {abs_path}')
+
         del self.preprocess_model
         del self.audio_to_coeff
         del self.animate_from_coeff
@@ -149,7 +201,6 @@ class SadTalker():
             torch.cuda.synchronize()
             
         import gc; gc.collect()
+
         
         return return_path
-
-    

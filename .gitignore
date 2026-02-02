@@ -170,3 +170,26 @@ start.sh
 
 # Mac
 .DS_Store
+
+# Virtual Environment
+venv310/
+
+# Large binary files
+ffmpeg.exe
+ffplay.exe
+ffprobe.exe
+
+# Uploads and generated content
+uploads/
+static/results/
+static/previews/
+
+# IDE
+.vscode/
+
+# Temporary files
+tempCodeRunnerFile.*
+
+# Test files
+test_*.mp4
+test_*.py

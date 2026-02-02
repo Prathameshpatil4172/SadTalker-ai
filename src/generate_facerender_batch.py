@@ -10,8 +10,13 @@ def get_facerender_data(coeff_path, pic_path, first_coeff_path, audio_path,
                         expression_scale=1.0, still_mode = False, preprocess='crop', size = 256):
 
     semantic_radius = 13
-    video_name = os.path.splitext(os.path.split(coeff_path)[-1])[0]
     txt_path = os.path.splitext(coeff_path)[0]
+
+    source_image_name = os.path.splitext(os.path.split(pic_path)[-1])[0]
+    source_video_name = os.path.splitext(os.path.split(audio_path)[-1])[0]
+    if source_video_name.endswith('.mp4'): # handle the .mp4.wav case
+        source_video_name = os.path.splitext(source_video_name)[0]
+    video_name = source_image_name + '_' + source_video_name
 
     data={}
 

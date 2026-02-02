@@ -202,7 +202,9 @@ class AnimateFromCoeff():
         video_name = x['video_name']  + '.mp4'
         path = os.path.join(video_save_dir, 'temp_'+video_name)
         
+        print("#-- SadTalker - animate.py - generate method: Saving temporary video with imageio...")
         imageio.mimsave(path, result,  fps=float(25))
+        print(f"#-- SadTalker - animate.py - generate method: Temporary video saved at {path}")
 
         av_path = os.path.join(video_save_dir, video_name)
         return_path = av_path 
@@ -217,9 +219,13 @@ class AnimateFromCoeff():
         end_time = start_time + frames*1/25*1000
         word1=sound.set_frame_rate(16000)
         word = word1[start_time:end_time]
+        print(f"#-- SadTalker - animate.py - generate method: Preparing audio from {audio_path} to {new_audio_path}")
         word.export(new_audio_path, format="wav")
+        print("#-- SadTalker - animate.py - generate method: Audio prepared.")
 
+        print(f"#-- SadTalker - animate.py - generate method: Merging video and audio with ffmpeg. Video: {path}, Audio: {new_audio_path}, Output: {av_path}")
         save_video_with_watermark(path, new_audio_path, av_path, watermark= False)
+        print("#-- SadTalker - animate.py - generate method: ffmpeg merging complete.")
         print(f'The generated video is named {video_save_dir}/{video_name}') 
 
         if 'full' in preprocess.lower():

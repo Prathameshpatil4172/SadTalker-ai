@@ -19,7 +19,7 @@ def load_video_to_cv2(input_path):
 
 def save_video_with_watermark(video, audio, save_path, watermark=False):
     temp_file = str(uuid.uuid4())+'.mp4'
-    cmd = r'ffmpeg -y -hide_banner -loglevel error -i "%s" -i "%s" -vcodec copy "%s"' % (video, audio, temp_file)
+    cmd = r'ffmpeg -y -hide_banner -loglevel error -i "%s" -i "%s" -vf "scale=trunc(iw/2)*2:trunc(ih/2)*2" -vcodec libx264 -pix_fmt yuv420p -acodec aac "%s"' % (video, audio, temp_file)
     os.system(cmd)
 
     if watermark is False:

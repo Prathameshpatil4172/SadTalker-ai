@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SadTalker - AI Talking Head Generator</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --accent: #06b6d4;
+            --dark: #0f172a;
+            --dark-light: #1e293b;
+            --dark-lighter: #334155;
+            --light: #f8fafc;
+            --gray: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --gradient-1: linear-gradient(135deg, #6366f1 0%, #ec4899 100%);
+            --gradient-2: linear-gradient(135deg, #06b6d4 0%, #6366f1 100%);
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-glow: 0 0 40px -10px var(--primary);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--dark);
+            color: var(--light);
+            min-height: 100vh;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        .bg-animation::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(236, 72, 153, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(6, 182, 212, 0.1) 0%, transparent 40%);
+            animation: bgFloat 20s ease-in-out infinite;
+        }
+
+        @keyframes bgFloat {
+            0%, 100% { transform: translate(0, 0) rotate(0deg); }
+            33% { transform: translate(30px, -30px) rotate(1deg); }
+            66% { transform: translate(-20px, 20px) rotate(-1deg); }
+        }
+
+        /* Grid Pattern Overlay */
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(99, 102, 241, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(99, 102, 241, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Header */
+        .header {
+            padding: 20px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--light);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            margin-bottom: 50px;
+            padding: 20px 0;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        /* Form Grid */
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 24px;
+            margin-bottom: 30px;
+        }
+
+        /* Cards */
+        .card {
+            background: rgba(30, 41, 59, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 28px;
+            backdrop-filter: blur(20px);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.5), transparent);
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            background: var(--gradient-1);
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--light);
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        /* Upload Areas */
+        .upload-area {
+            border: 2px dashed rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(99, 102, 241, 0.05);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-area:hover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.1);
+        }
+
+        .upload-area.dragover {
+            border-color: var(--primary);
+            background: rgba(99, 102, 241, 0.15);
+            transform: scale(1.02);
+        }
+
+        .upload-area i {
+            font-size: 3rem;
+            color: var(--primary);
+            margin-bottom: 16px;
+            display: block;
+        }
+
+        .upload-text {
+            font-size: 1rem;
+            color: var(--light);
+            margin-bottom: 8px;
+        }
+
+        .upload-hint {
+            font-size: 0.85rem;
+            color: var(--gray);
+        }
+
+        .upload-input {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        /* Preview Box */
+        .preview-box {
+            margin-top: 20px;
+            border-radius: 12px;
+            overflow: hidden;
+            background: var(--dark);
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .preview-box img {
+            max-width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+        }
+
+        .preview-box video {
+            max-width: 100%;
+            max-height: 300px;
+            background: var(--dark);
+        }
+
+        .preview-box audio {
+            width: 100%;
+            padding: 20px;
+        }
+
+        .preview-placeholder {
+            color: var(--gray);
+            font-size: 0.9rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .preview-placeholder i {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            padding: 20px;
+            display: none;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient-1);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        /* Toggle Switches */
+        .toggle-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .toggle-group:last-child {
+            border-bottom: none;
+        }
+
+        .toggle-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toggle-label {
+            font-size: 0.95rem;
+            color: var(--light);
+            font-weight: 500;
+        }
+
+        .toggle-desc {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 2px;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 52px;
+            height: 28px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 28px;
+            transition: 0.3s;
+        }
+
+        .toggle-slider::before {
+            content: '';
+            position: absolute;
+            height: 22px;
+            width: 22px;
+            left: 3px;
+            bottom: 3px;
+            background: white;
+            border-radius: 50%;
+            transition: 0.3s;
+        }
+
+        .toggle-switch input:checked + .toggle-slider {
+            background: var(--primary);
+        }
+
+        .toggle-switch input:checked + .toggle-slider::before {
+            transform: translateX(24px);
+        }
+
+        /* Radio Groups */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .radio-btn {
+            position: relative;
+        }
+
+        .radio-btn input {
+            opacity: 0;
+            position: absolute;
+        }
+
+        .radio-label {
+            display: block;
+            padding: 10px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+
+        .radio-btn input:checked + .radio-label {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: var(--primary);
+            color: var(--light);
+        }
+
+        .radio-label:hover {
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+
+        /* Range Slider */
+        .range-container {
+            margin: 20px 0;
+        }
+
+        .range-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .range-label {
+            font-size: 0.95rem;
+            color: var(--light);
+        }
+
+        .range-value {
+            font-size: 0.95rem;
+            color: var(--primary);
+            font-weight: 600;
+            font-family: monospace;
+        }
+
+        .range-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--primary);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.5);
+        }
+
+        .range-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
+        }
+
+        /* Number Input */
+        .number-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .number-input input {
+            width: 80px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--light);
+            font-size: 1rem;
+            text-align: center;
+        }
+
+        .number-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Settings Grid */
+        .settings-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        /* Submit Button */
+        .submit-section {
+            margin-top: 40px;
+            text-align: center;
+        }
+
+        .submit-btn {
+            padding: 18px 60px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            background: var(--gradient-1);
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px -10px rgba(99, 102, 241, 0.5);
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 40px -10px rgba(99, 102, 241, 0.6);
+        }
+
+        .submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .submit-btn i {
+            font-size: 1.2rem;
+        }
+
+        /* Help Link */
+        .help-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--primary-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .help-link:hover {
+            color: var(--primary);
+            gap: 12px;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--dark-light);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            width: 90%;
+            max-width: 700px;
+            max-height: 80vh;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            border: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--gray);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+
+        .modal-body {
+            padding: 24px;
+            max-height: 50vh;
+            overflow-y: auto;
+        }
+
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .history-item:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .history-name {
+            color: var(--light);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .history-name i {
+            color: var(--primary);
+        }
+
+        .history-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .history-btn {
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .history-btn.view {
+            background: rgba(99, 102, 241, 0.2);
+            color: var(--primary-light);
+        }
+
+        .history-btn.download {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+
+        .history-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray);
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                padding: 15px 20px;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+
+            .settings-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .submit-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Clear button for preview */
+        .clear-preview {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(239, 68, 68, 0.8);
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        .clear-preview:hover {
+            background: var(--error);
+            transform: scale(1.1);
+        }
+
+        .preview-box.has-content .clear-preview {
+            display: flex;
+        }
+    </style>
+<base target="_blank">
+</head>
+<body>
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <header class="header">
+        <div class="logo">
+            <i class="fas fa-robot"></i>
+            <span>SadTalker</span>
+        </div>
+        <button class="nav-btn" onclick="openHistory()">
+            <i class="fas fa-history"></i>
+            History
+        </button>
+    </header>
+
+    <div class="container">
+        <div class="hero">
+            <h1>AI Talking Head Generator</h1>
+            <p>Transform static images into lifelike talking head videos with advanced AI technology</p>
+        </div>
+
+        <form method="POST" enctype="multipart/form-data" id="mainForm">
+            <!-- Top Row: Image and Audio -->
+            <div class="form-grid">
+                <!-- Source Image -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">Source Image</div>
+                            <div class="card-subtitle">Upload a portrait photo</div>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-area" id="imageUpload">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <div class="upload-text">Drop your image here or click to browse</div>
+                        <div class="upload-hint">Supports JPG, PNG, WEBP</div>
+                        <input type="file" name="image" accept="image/*" class="upload-input" onchange="previewFile(this, 'img_preview')" required>
+                    </div>
+                    
+                    <div class="preview-box" id="img_preview">
+                        <div class="preview-placeholder">
+                            <i class="fas fa-image"></i>
+                            <span>Image preview will appear here</span>
+                        </div>
+                        <button type="button" class="clear-preview" onclick="clearPreview('img_preview', 'image')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Audio Source -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon" style="background: var(--gradient-2);">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <div>
+                            <div class="card-title">Audio Source</div>
+                            <div class="card-subtitle">Upload audio or use idle mode</div>
+                        </div>
+                    </div>
+                    
+                    <div class="upload-area" id="audioUpload">
+                        <i class="fas fa-headphones"></i>
+                        <div class="upload-text">Drop your audio here or click to browse</div>
+                        <div class="upload-hint">Supports WAV, MP3</div>
+                        <input type="file" name="audio" accept="audio/*" class="upload-input" onchange="previewFile(this, 'audio_preview')">
+                    </div>
+                    
+                    <div class="preview-box" id="audio_preview">
+                        <div class="preview-placeholder">
+                            <i class="fas fa-music"></i>
+                            <span>Audio preview will appear here</span>
+                        </div>
+                        <button type="button" class="clear-preview" onclick="clearPreview('audio_preview', 'audio')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+
+                    <div class="toggle-group" style="margin-top: 20px;">
+                        <div class="toggle-info">
+                            <span class="toggle-label">Idle Mode</span>
+                            <span class="toggle-desc">Generate without audio input</span>
+                        </div>
+                        <label class="toggle-switch">
+                            <input type="checkbox" name="use_idle_mode" id="use_idle_mode" onchange="toggleIdleMode()">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="range-container" id="idleLengthContainer" style="display: none;">
+                        <div class="range-header">
+                            <span class="range-label">Video Length</span>
+                            <span class="range-value" id="length_val">5s</span>
+                        </div>
+                        <input type="range" name="length_of_audio" min="1" max="60" value="5" class="range-slider" oninput="document.getElementById('length_val').innerText = this.value + 's'">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reference Video -->
+            <div class="card" style="margin-bottom: 24px;">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Reference Video</div>
+                        <div class="card-subtitle">Optional: Use a video to guide poses and expressions</div>
+                    </div>
+                </div>
+
+                <div class="toggle-group">
+                    <div class="toggle-info">
+                        <span class="toggle-label">Enable Reference Video</span>
+                        <span class="toggle-desc">Use video for pose/blink reference</span>
+                    </div>
+                    <label class="toggle-switch">
+                        <input type="checkbox" name="use_ref_video" id="use_ref_video" onchange="toggleRefVideo()">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+
+                <div id="refVideoSection" style="display: none; margin-top: 20px;">
+                    <div class="row" style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+                        <div>
+                            <div class="upload-area" id="videoUpload">
+                                <i class="fas fa-film"></i>
+                                <div class="upload-text">Drop reference video here</div>
+                                <div class="upload-hint">Supports MP4, WEBM, MOV</div>
+                                <input type="file" name="ref_video" accept="video/mp4,video/webm,video/quicktime" class="upload-input" onchange="previewFile(this, 'vid_preview')">
+                            </div>
+                            
+                            <div style="margin-top: 20px;">
+                                <label style="font-size: 0.95rem; color: var(--light); margin-bottom: 10px; display: block;">Reference Strategy</label>
+                                <div class="radio-group">
+                                    <div class="radio-btn">
+                                        <input type="radio" name="ref_info" value="pose" id="ref_pose" checked>
+                                        <label for="ref_pose" class="radio-label">Pose</label>
+                                    </div>
+                                    <div class="radio-btn">
+                                        <input type="radio" name="ref_info" value="blink" id="ref_blink">
+                                        <label for="ref_blink" class="radio-label">Blink</label>
+                                    </div>
+                                    <div class="radio-btn">
+                                        <input type="radio" name="ref_info" value="pose+blink" id="ref_both">
+                                        <label for="ref_both" class="radio-label">Pose + Blink</label>
+                                    </div>
+                                    <div class="radio-btn">
+                                        <input type="radio" name="ref_info" value="all" id="ref_all">
+                                        <label for="ref_all" class="radio-label">All</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="preview-box" id="vid_preview">
+                            <div class="preview-placeholder">
+                                <i class="fas fa-video"></i>
+                                <span>Video preview will appear here</span>
+                            </div>
+                            <button type="button" class="clear-preview" onclick="clearPreview('vid_preview', 'ref_video')">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #22c55e 0%, #06b6d4 100%);">
+                        <i class="fas fa-sliders-h"></i>
+                    </div>
+                    <div>
+                        <div class="card-title">Generation Settings</div>
+                        <div class="card-subtitle">Fine-tune your output</div>
+                    </div>
+                    <a href="https://github.com/OpenTalker/SadTalker/blob/main/docs/best_practice.md" target="_blank" class="help-link" style="margin-left: auto;">
+                        <i class="fas fa-question-circle"></i>
+                        Best Practices
+                    </a>
+                </div>
+
+                <div class="settings-grid">
+                    <div>
+                        <label style="font-size: 0.95rem; color: var(--light); margin-bottom: 10px; display: block;">Preprocess Mode</label>
+                        <div class="radio-group">
+                            <div class="radio-btn">
+                                <input type="radio" name="preprocess" value="crop" id="pre_crop" checked>
+                                <label for="pre_crop" class="radio-label">Crop</label>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" name="preprocess" value="resize" id="pre_resize">
+                                <label for="pre_resize" class="radio-label">Resize</label>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" name="preprocess" value="full" id="pre_full">
+                                <label for="pre_full" class="radio-label">Full</label>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" name="preprocess" value="extcrop" id="pre_extcrop">
+                                <label for="pre_extcrop" class="radio-label">ExtCrop</label>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" name="preprocess" value="extfull" id="pre_extfull">
+                                <label for="pre_extfull" class="radio-label">ExtFull</label>
+                            </div>
+                        </div>
+
+                        <label style="font-size: 0.95rem; color: var(--light); margin: 20px 0 10px; display: block;">Face Resolution</label>
+                        <div class="radio-group">
+                            <div class="radio-btn">
+                                <input type="radio" name="size" value="256" id="size_256" checked>
+                                <label for="size_256" class="radio-label">256px</label>
+                            </div>
+                            <div class="radio-btn">
+                                <input type="radio" name="size" value="512" id="size_512">
+                                <label for="size_512" class="radio-label">512px</label>
+                            </div>
+                        </div>
+
+                        <div class="range-container">
+                            <div class="range-header">
+                                <span class="range-label">Batch Size</span>
+                                <span class="range-value" id="batch_val">1</span>
+                            </div>
+                            <input type="range" name="batch_size" min="1" max="10" value="1" class="range-slider" oninput="document.getElementById('batch_val').innerText = this.value">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="range-container">
+                            <div class="range-header">
+                                <span class="range-label">Pose Style</span>
+                                <span class="range-value" id="pose_val">0</span>
+                            </div>
+                            <input type="range" name="pose_style" min="0" max="45" value="0" class="range-slider" oninput="document.getElementById('pose_val').innerText = this.value">
+                        </div>
+
+                        <div class="range-container">
+                            <div class="range-header">
+                                <span class="range-label">Expression Scale</span>
+                                <span class="range-value" id="exp_val">1.0</span>
+                            </div>
+                            <input type="range" name="exp_scale" min="0" max="3" step="0.1" value="1.0" class="range-slider" oninput="document.getElementById('exp_val').innerText = this.value">
+                        </div>
+
+                        <div class="toggle-group" style="margin-top: 20px;">
+                            <div class="toggle-info">
+                                <span class="toggle-label">Still Mode</span>
+                                <span class="toggle-desc">Reduce head motion</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="still_mode">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <span class="toggle-label">GFPGAN Enhancer</span>
+                                <span class="toggle-desc">Improve face quality</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="enhancer">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+
+                        <div class="toggle-group">
+                            <div class="toggle-info">
+                                <span class="toggle-label">Eye Blink</span>
+                                <span class="toggle-desc">Natural blinking</span>
+                            </div>
+                            <label class="toggle-switch">
+                                <input type="checkbox" name="use_blink" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="submit-section">
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <i class="fas fa-magic"></i>
+                    Generate Video
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- History Modal -->
+    <div id="historyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title">
+                    <i class="fas fa-history" style="color: var(--primary); margin-right: 10px;"></i>
+                    Generation History
+                </div>
+                <button class="modal-close" onclick="closeHistory()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="historyList" class="history-list">
+                    <div class="empty-state">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Loading history...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Drag and drop support
+        document.querySelectorAll('.upload-area').forEach(area => {
+            area.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                area.classList.add('dragover');
+            });
+
+            area.addEventListener('dragleave', () => {
+                area.classList.remove('dragover');
+            });
+
+            area.addEventListener('drop', (e) => {
+                e.preventDefault();
+                area.classList.remove('dragover');
+                const input = area.querySelector('input');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    input.files = files;
+                    input.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+
+        // Preview file function
+        async function previewFile(input, previewId) {
+            const previewBox = document.getElementById(previewId);
+            const file = input.files[0];
+            
+            if (!file) return;
+
+            previewBox.classList.add('has-content');
+
+            // IMAGE
+            if (file.type.startsWith('image/')) {
+                const img = document.createElement('img');
+                img.src = URL.createObjectURL(file);
+                img.onload = () => URL.revokeObjectURL(img.src);
+                previewBox.innerHTML = '';
+                previewBox.appendChild(img);
+                addClearButton(previewBox, previewId, input.name);
+                return;
+            }
+
+            // AUDIO
+            if (file.type.startsWith('audio/')) {
+                const audio = document.createElement('audio');
+                audio.src = URL.createObjectURL(file);
+                audio.controls = true;
+                previewBox.innerHTML = '';
+                previewBox.appendChild(audio);
+                addClearButton(previewBox, previewId, input.name);
+                return;
+            }
+
+            // VIDEO PREVIEW (Server-side conversion)
+            if (file.type.startsWith('video/') || /\.(mp4|webm|mov)$/i.test(file.name)) {
+                const submitBtn = document.getElementById('submitBtn');
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading"></span> Processing Preview...';
+                
+                previewBox.innerHTML = `
+                    <div class="progress-container active" style="width: 100%;">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress_${previewId}" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-text" id="text_${previewId}">Uploading...</div>
+                    </div>
+                `;
+
+                const formData = new FormData();
+                formData.append('file', file);
+
+                const xhr = new XMLHttpRequest();
+                xhr.open('POST', '/upload_preview', true);
+
+                xhr.upload.onprogress = function(e) {
+                    if (e.lengthComputable) {
+                        const percent = Math.round((e.loaded / e.total) * 100);
+                        document.getElementById(`progress_${previewId}`).style.width = percent + '%';
+                        document.getElementById(`text_${previewId}`).innerText = percent === 100 ? 'Processing on server...' : `Uploading... ${percent}%`;
+                    }
+                };
+
+                xhr.onload = function() {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Video';
+                    
+                    if (xhr.status === 200) {
+                        const data = JSON.parse(xhr.responseText);
+                        showVideoPreview(data.url, previewBox, previewId);
+                    } else {
+                        previewBox.innerHTML = `<div class="preview-placeholder"><i class="fas fa-exclamation-triangle" style="color: var(--error);"></i><span>Preview failed. File will still work.</span></div>`;
+                    }
+                };
+
+                xhr.onerror = function() {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-magic"></i> Generate Video';
+                    previewBox.innerHTML = `<div class="preview-placeholder"><i class="fas fa-exclamation-triangle" style="color: var(--error);"></i><span>Network error.</span></div>`;
+                };
+
+                xhr.send(formData);
+            }
+        }
+
+        function showVideoPreview(src, previewBox, previewId) {
+            previewBox.innerHTML = '';
+            const video = document.createElement('video');
+            video.src = src;
+            video.controls = true;
+            video.muted = true;
+            video.setAttribute('playsinline', '');
+            previewBox.appendChild(video);
+            addClearButton(previewBox, previewId, 'ref_video');
+        }
+
+        function addClearButton(previewBox, previewId, inputName) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'clear-preview';
+            btn.innerHTML = '<i class="fas fa-times"></i>';
+            btn.onclick = () => clearPreview(previewId, inputName);
+            previewBox.appendChild(btn);
+        }
+
+        function clearPreview(previewId, inputName) {
+            const previewBox = document.getElementById(previewId);
+            const input = document.querySelector(`input[name="${inputName}"]`);
+            if (input) input.value = '';
+            previewBox.classList.remove('has-content');
+            previewBox.innerHTML = `
+                <div class="preview-placeholder">
+                    <i class="fas fa-${previewId.includes('img') ? 'image' : previewId.includes('audio') ? 'music' : 'video'}"></i>
+                    <span>${previewId.includes('img') ? 'Image' : previewId.includes('audio') ? 'Audio' : 'Video'} preview will appear here</span>
+                </div>
+            `;
+        }
+
+        // Toggle functions
+        function toggleIdleMode() {
+            const checkbox = document.getElementById('use_idle_mode');
+            const container = document.getElementById('idleLengthContainer');
+            const audioUpload = document.getElementById('audioUpload');
+            const audioInput = audioUpload.querySelector('input');
+            
+            if (checkbox.checked) {
+                container.style.display = 'block';
+                audioUpload.style.opacity = '0.5';
+                audioUpload.style.pointerEvents = 'none';
+                audioInput.disabled = true;
+            } else {
+                container.style.display = 'none';
+                audioUpload.style.opacity = '1';
+                audioUpload.style.pointerEvents = 'auto';
+                audioInput.disabled = false;
+            }
+        }
+
+        function toggleRefVideo() {
+            const checkbox = document.getElementById('use_ref_video');
+            const section = document.getElementById('refVideoSection');
+            section.style.display = checkbox.checked ? 'block' : 'none';
+        }
+
+        // Form submission
+        document.getElementById('mainForm').addEventListener('submit', function(e) {
+            const btn = document.getElementById('submitBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading"></span> Generating Video...';
+        });
+
+        // History Modal
+        function openHistory() {
+            document.getElementById('historyModal').classList.add('active');
+            fetchHistory();
+        }
+
+        function closeHistory() {
+            document.getElementById('historyModal').classList.remove('active');
+        }
+
+        async function fetchHistory() {
+            const list = document.getElementById('historyList');
+            try {
+                const res = await fetch('/history');
+                const files = await res.json();
+                
+                if (files.length === 0) {
+                    list.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-inbox"></i>
+                            <p>No generated videos yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                list.innerHTML = files.map(f => `
+                    <div class="history-item">
+                        <span class="history-name">
+                            <i class="fas fa-video"></i>
+                            ${f}
+                        </span>
+                        <div class="history-actions">
+                            <a href="/result/${f}" class="history-btn view">
+                                <i class="fas fa-eye"></i> View
+                            </a>
+                            <a href="/static/results/${f}" download class="history-btn download">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-exclamation-circle" style="color: var(--error);"></i>
+                        <p>Error loading history</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Close modal on outside click
+        document.getElementById('historyModal').addEventListener('click', function(e) {
+            if (e.target === this) closeHistory();
+        });
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeHistory();
+        });
+    </script>
+</body>
+</html>

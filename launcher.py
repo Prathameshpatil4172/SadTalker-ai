@@ -13,8 +13,8 @@ git = os.environ.get('GIT', "git")
 index_url = os.environ.get('INDEX_URL', "")
 stored_commit_hash = None
 skip_install = False
-dir_repos = "repositories"
-script_path = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+dir_repos = "repositories" # This is relative to script_path
+script_path = os.path.dirname(os.path.abspath(__file__)) # Correctly identifies the directory of launcher.py as the project root.
 
 if 'GRADIO_ANALYTICS_ENABLED' not in os.environ:
     os.environ['GRADIO_ANALYTICS_ENABLED'] = 'False'
@@ -168,6 +168,11 @@ def run_extension_installer(extension_dir):
 
 
 def prepare_environment():
+    # When running as a bundled app, skip installation steps
+    if getattr(sys, 'frozen', False) and hasattr(sys, '_MEIPASS'):
+        print("Running in a bundled application, skipping environment preparation.")
+        return
+
     global skip_install
 
     torch_command = os.environ.get('TORCH_COMMAND', "pip install torch==1.12.1+cu113 torchvision==0.13.1+cu113 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113")
@@ -193,12 +198,12 @@ def prepare_environment():
 
 
 def start():
-    print(f"Launching SadTalker Web UI")
-    from app import sadtalker_demo
-    demo = sadtalker_demo()
-    demo.queue()
-    demo.launch()
+    print(f"Launching SadTalker Flask App")
+    subprocess.run([sys.executable, "app_flask.py"])
+
 
 if __name__ == "__main__":
     prepare_environment()
     start()
+    
+    
