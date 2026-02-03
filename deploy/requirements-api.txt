@@ -1,6 +1,10 @@
 # SadTalker AI - API Server Requirements
 # For deployment on Render/Railway/Fly.io
 
+# Build dependencies (needed for some packages)
+setuptools>=65.0.0
+wheel>=0.40.0
+
 # Web Framework
 flask>=2.3.0
 gunicorn>=21.0.0
@@ -16,6 +20,3 @@ boto3>=1.28.0
 # Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
-
-# Production
-uvicorn>=0.23.0
