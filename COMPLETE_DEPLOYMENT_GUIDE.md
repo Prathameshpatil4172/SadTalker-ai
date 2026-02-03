@@ -214,6 +214,8 @@ Key: AWS_REGION
 Value: us-east-1
 ```
 
+**Note:** If you're NOT using AWS S3 (using Supabase Storage instead), you can skip the AWS variables. The API server will work with Supabase Storage only.
+
 2. **Click "Save Changes"**
    - Render will redeploy with new environment
 
