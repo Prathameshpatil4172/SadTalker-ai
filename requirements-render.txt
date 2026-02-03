@@ -1,0 +1,28 @@
+# SadTalker AI - API Server Requirements for Render
+# This file is used by Render's default build process
+# It includes both the API dependencies and the core SadTalker dependencies
+
+# Build dependencies
+setuptools>=65.0.0
+wheel>=0.40.0
+
+# Web Framework (API Server)
+flask>=2.3.0
+gunicorn>=21.0.0
+flask-cors>=4.0.0
+flask-limiter>=3.5.0
+
+# Database
+supabase>=2.0.0
+
+# AWS S3 (optional)
+boto3>=1.28.0
+
+# Utilities
+python-dotenv>=1.0.0
+requests>=2.31.0
+
+# Core SadTalker dependencies (needed for API to import)
+numpy==1.23.4
+pillow
+opencv-python
