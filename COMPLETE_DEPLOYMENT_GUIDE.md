@@ -244,6 +244,112 @@ Value: us-east-1
 
 ### 3.1 Prepare Frontend Code
 
+Your main UI file is `unified.html` in the root directory. For Vercel deployment, you need to either:
+
+**Option A: Use unified.html as static site**
+1. Rename `unified.html` to `index.html` (or create a copy)
+2. Create a simple `package.json`:
+```json
+{
+  "name": "sadtalker-frontend",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "echo 'Static site - no build needed'"
+  }
+}
+```
+
+**Option B: Use the React app in /app folder**
+The `app/` folder contains a React + Vite application with modern UI components.
+
+### 3.2 Deploy unified.html (Simple Static Site)
+
+If you want to deploy `unified.html` directly:
+
+1. **Create vercel.json in root:**
+```json
+{
+  "version": 2,
+  "routes": [
+    { "src": "/", "dest": "/unified.html" },
+    { "src": "/(.*)", "dest": "/unified.html" }
+  ]
+}
+```
+
+2. **Deploy to Vercel:**
+```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
+vercel --prod
+```
+
+Or connect your GitHub repo to Vercel and set:
+- **Framework Preset**: `Other`
+- **Build Command**: (leave empty)
+- **Output Directory**: `.` (root)
+
+### 3.3 Deploy React App (Recommended)
+
+The `app/` folder has a modern React setup:
+
+1. **Configure Environment Variables**
+   Create `app/.env.production`:
+```env
+VITE_API_BASE_URL=https://sadtalker-api.onrender.com/api/v1
+VITE_SUPABASE_URL=https://your-project-id.supabase.co
+VITE_SUPABASE_ANON_KEY=your-anon-key-from-step-1.2
+```
+
+2. **Deploy from app folder:**
+```bash
+cd app
+vercel --prod
+```
+
+Or in Vercel dashboard:
+- **Root Directory**: `app`
+- **Framework Preset**: `Vite`
+- **Build Command**: `npm run build`
+- **Output Directory**: `dist`
+
+### 3.4 Configure Custom Domain (Optional)
+
+1. **Domain Settings**
+   - Project Settings → Domains
+   - Enter your domain (e.g., `sadtalker-ai.com`)
+   - Follow DNS instructions
+
+2. **Update CORS in API**
+   Edit `deploy/api_server.py` line ~50:
+```python
+CORS(app, origins=[
+    "https://sadtalker-ai.vercel.app",
+    "https://sadtalker-ai.com",
+    "http://localhost:3000",
+    "http://localhost:5173"
+])
+```
+   - Commit and push → auto-redeploy
+
+### 3.5 Verify Frontend
+
+1. **Open Vercel URL**
+   - Should see your SadTalker UI
+   - Check browser console for errors
+
+2. **Test API Connection**
+   - The frontend should connect to your Render API
+   - Check network tab for API calls
+
+---
+
+## Step 4: Start GPU Runner (Google Colab)
+
+### 3.1 Prepare Frontend Code
+
 1. **Create frontend directory structure** (if not exists):
 ```
 frontend/
