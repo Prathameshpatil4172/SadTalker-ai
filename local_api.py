@@ -242,6 +242,23 @@ def generate_video_task(job_id, img_path, aud_path, config):
 # API Routes
 # ============================================
 
+@app.route('/')
+def home():
+    """Root endpoint - shows API is running."""
+    return jsonify({
+        "success": True,
+        "message": "SadTalker Local API Server is running!",
+        "endpoints": {
+            "health": "/api/v1/health",
+            "create_job": "POST /api/v1/jobs",
+            "get_job": "GET /api/v1/jobs/<job_id>",
+            "list_jobs": "GET /api/v1/jobs",
+            "download": "GET /api/v1/jobs/<job_id>/download",
+            "stream": "GET /api/v1/jobs/<job_id>/stream"
+        },
+        "docs": "See SETUP_GUIDE.md for usage instructions"
+    })
+
 @app.route('/api/v1/health', methods=['GET'])
 def health_check():
     """Health check endpoint."""
